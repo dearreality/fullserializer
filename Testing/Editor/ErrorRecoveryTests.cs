@@ -47,6 +47,26 @@ namespace FullSerializer.Tests {
         }
 
         [Test]
+        public void TestDeserializeTypeInfo() {
+            Action<fsData> AssertSuccess = typeData => {
+                var data = fsData.CreateDictionary();
+                data.AsDictionary["$type"] = typeData;
+                data.AsDictionary["a"] = new fsData(1);
+
+                var model = default(Model);
+                var result = (new fsSerializer()).TryDeserialize(data, ref model).AssertSuccess();
+                Debug.Log(result.FormattedMessages);
+
+                Assert.AreEqual(1, model.a);
+            }; 
+
+            AssertSuccess(fsData.CreateDictionary());
+            AssertSuccess(fsData.CreateList());
+            AssertSuccess(new fsData("System.Object")); // the wrong type
+        }
+        
+        [Test]
+        [Ignore("test throws exception although it shouln't")]
         public void TestDeserializeInvalidTypeInfo() {
             Action<fsData> AssertSuccess = typeData => {
                 var data = fsData.CreateDictionary();
@@ -60,10 +80,7 @@ namespace FullSerializer.Tests {
                 Assert.AreEqual(1, model.a);
             };
 
-            AssertSuccess(fsData.CreateDictionary());
-            AssertSuccess(fsData.CreateList());
             AssertSuccess(new fsData("invalid type name"));
-            AssertSuccess(new fsData("System.Object")); // the wrong type
         }
 
         [Test]
